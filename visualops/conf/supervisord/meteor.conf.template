@@ -1,0 +1,87 @@
+; Sample supervisor config file.
+;
+; For more information on the config file, please see:
+; http://supervisord.org/configuration.html
+;
+; Note: shell expansion ("~" or "$HOME") is not supported.  Environment
+; variables can be expanded using this syntax: "%(ENV_HOME)s".
+
+;start meteor
+
+[eventlistener:Meteor]
+command=python -u /usr/bin/rubber -p meteor* -n 4
+events=SUPERVISOR_STATE_CHANGE_RUNNING
+stdout_events_enabled=false
+loglevel=info
+redirect_stderr=true
+environment=PYTHON_EGG_CACHE=/visualops/.python-eggs
+stdout_logfile=/visualops/log/supervisord/meteor.log
+stdout_logfile_maxbytes=100MB
+stdout_logfile_backups=5
+stdout_capture_maxbytes=1MB
+stdout_events_enabled=false
+redirect_stderr=true
+
+[program:meteor0]
+command=/usr/local/bin/meteor --port 8300
+autorestart=true
+startretries=3
+user=visualops
+loglevel=info
+redirect_stderr=true
+environment=MONGO_URL=mongodb://localhost:8290/forge,HOME=/visualops/source/websocket0/server/,USER=visualops,MONGO_OPLOG_URL="mongodb://10.0.0.4:8292,10.0.1.4:8292,10.0.2.4:8292/local"
+directory=/visualops/source/websocket0
+stdout_logfile=/visualops/log/supervisord/meteor0.log
+stdout_logfile_maxbytes=100MB
+stdout_logfile_backups=5
+stdout_capture_maxbytes=1MB
+stdout_events_enabled=false
+redirect_stderr=true
+
+[program:meteor1]
+command=/usr/local/bin/meteor --port 8310
+autorestart=true
+startretries=3
+user=visualops
+loglevel=info
+redirect_stderr=true
+environment=MONGO_URL=mongodb://localhost:8290/forge,HOME=/visualops/source/websocket1/server/,USER=visualops,MONGO_OPLOG_URL="mongodb://10.0.0.4:8292,10.0.1.4:8292,10.0.2.4:8292/local"
+directory=/visualops/source/websocket1
+stdout_logfile=/visualops/log/supervisord/meteor1.log
+stdout_logfile_maxbytes=100MB
+stdout_logfile_backups=5
+stdout_capture_maxbytes=1MB
+stdout_events_enabled=false
+redirect_stderr=true
+
+[program:meteor2]
+command=/usr/local/bin/meteor --port 8320
+autorestart=true
+startretries=3
+user=visualops
+loglevel=info
+redirect_stderr=true
+environment=MONGO_URL=mongodb://localhost:8290/forge,HOME=/visualops/source/websocket2/server/,USER=visualops,MONGO_OPLOG_URL="mongodb://10.0.0.4:8292,10.0.1.4:8292,10.0.2.4:8292/local"
+directory=/visualops/source/websocket2
+stdout_logfile=/visualops/log/supervisord/meteor2.log
+stdout_logfile_maxbytes=100MB
+stdout_logfile_backups=5
+stdout_capture_maxbytes=1MB
+stdout_events_enabled=false
+redirect_stderr=true
+
+[program:meteor3]
+command=/usr/local/bin/meteor --port 8330
+autorestart=true
+startretries=3
+user=visualops
+loglevel=info
+redirect_stderr=true
+environment=MONGO_URL=mongodb://localhost:8290/forge,HOME=/visualops/source/websocket3/server/,USER=visualops,MONGO_OPLOG_URL="mongodb://10.0.0.4:8292,10.0.1.4:8292,10.0.2.4:8292/local"
+directory=/visualops/source/websocket3
+stdout_logfile=/visualops/log/supervisord/meteor3.log
+stdout_logfile_maxbytes=100MB
+stdout_logfile_backups=5
+stdout_capture_maxbytes=1MB
+stdout_events_enabled=false
+redirect_stderr=true

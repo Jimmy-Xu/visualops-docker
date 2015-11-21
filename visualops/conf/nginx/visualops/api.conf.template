@@ -1,0 +1,142 @@
+upstream AppService  {
+	server 127.0.0.1:8700 weight=10 max_fails=3 fail_timeout=30s;
+	#server 127.0.0.1:8701 weight=10 max_fails=3 fail_timeout=30s;
+	#server 127.0.0.1:8702 weight=10 max_fails=3 fail_timeout=30s;
+	#server 127.0.0.1:8703 weight=10 max_fails=3 fail_timeout=30s;
+}
+
+upstream WebSocket  {
+	server 127.0.0.1:8700 weight=10 max_fails=3 fail_timeout=30s;
+	#server 127.0.0.1:8310 weight=10 max_fails=3 fail_timeout=30s;
+	#server 127.0.0.1:8320 weight=10 max_fails=3 fail_timeout=30s;
+	#server 127.0.0.1:8330 weight=10 max_fails=3 fail_timeout=30s;
+}
+
+server {
+	listen      80;
+	#listen      443;
+	server_name  api.*;
+
+	access_log      /visualops/log/nginx-api-access.log;
+	error_log       /visualops/log/nginx-api-error.log debug;
+
+    #ssl_certificate         /visualops/conf/internal/conf/ssl/visualops.io.crt;
+	#ssl_certificate_key     /visualops/conf/internal/conf/ssl/visualops.io.pem;
+	#ssl_protocols SSLv3 TLSv1;
+	#ssl_ciphers ALL:!aNULL:!ADH:!eNULL:!LOW:!EXP:RC4+RSA:+HIGH:+MEDIUM;
+
+	if ($request_method !~ ^(GET|HEAD|POST|OPTIONS|PUT|DELETE)$ ) {
+		return 444;
+	}
+	#error_page 404 500 502 503 504  /bush.html;
+	#location = /bush.html {
+	#	internal;
+	#}
+	#error_page 403 /403.html;
+	#location = /403.html {
+	#	root   html;
+	#	allow all;
+	#}
+	location = /favicon.ico {
+		root /visualops/site/api/;
+		index favicon.ico;
+		log_not_found off;
+		access_log off;
+	}
+
+	location / {
+	    
+	    if ($request_method = OPTIONS ) {
+	      add_header Access-Control-Allow-Origin *;
+	      add_header Access-Control-Allow-Methods "GET, PUT, POST, PATCH, DELETE, HEAD, OPTIONS";
+	      add_header Access-Control-Allow-Headers "Origin, X-Requested-With, Content-Type, Accept, Authorization, If-None-Match, If-Match, Cache-Control";
+	      add_header Access-Control-Allow-Credentials "true";
+	      add_header Content-Length 0;
+	      add_header Content-Type text/plain;
+	      return 200;
+	    }
+
+		proxy_pass  http://AppService/;
+		proxy_next_upstream error timeout invalid_header http_500 http_502 http_503;	### force timeouts if one of backend is died ##
+		proxy_set_header Host $host;
+		proxy_set_header X-Real-IP $remote_addr;
+		proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+		proxy_set_header X-Forwarded-Proto https;	### Most PHP, Python, Rails, Java App can use this header ###
+		proxy_redirect off;		### By default we don't want to redirect it ####
+
+		client_max_body_size 10m;
+        proxy_buffer_size 10m;
+        proxy_buffers 8 10m;
+        proxy_busy_buffers_size 10m;
+        
+        proxy_connect_timeout 30;
+        proxy_send_timeout 30;
+        proxy_read_timeout 60;
+	}
+	location /ws/ {
+		rewrite /ws/(.*) /ws/$1 break;
+		proxy_set_header X-Real-IP $remote_addr;
+		proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+		proxy_set_header Host $http_host;
+		proxy_set_header X-NginX-Proxy true;
+		proxy_pass http://WebSocket/;
+		proxy_redirect off;
+		proxy_http_version 1.1;
+		proxy_set_header Upgrade $http_upgrade;
+		proxy_set_header Connection "Upgrade";
+		proxy_connect_timeout 30;
+        proxy_send_timeout 30;
+        proxy_read_timeout 60;
+    }
+    
+    location /agent/ {
+        rewrite /agent/(.*) /agent/$1 break;
+        proxy_pass  http://127.0.0.1:8963/agent/;
+        #proxy_next_upstream error timeout invalid_header http_500 http_502 http_503;    ### force timeouts if one of backend is died ##
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-NginX-Proxy true;
+        #proxy_set_header X-Forwarded-Proto https;       ### Most PHP, Python, Rails, Java App can use this header ###
+        proxy_redirect off;             ### By default we don't want to redirect it ####
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "Upgrade";
+
+    }
+
+    location /v1/ {
+        proxy_pass http://127.0.0.1:8962/v1/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto https;   ### Most PHP, Python, Rails, Java App can use this header ###
+        proxy_redirect off;     ### By default we don't want to redirect it ####
+        proxy_connect_timeout 30;
+        proxy_send_timeout 30;
+        proxy_read_timeout 60;
+        client_max_body_size 10m;
+        proxy_buffer_size 10m;
+        proxy_buffers 8 10m;
+        proxy_busy_buffers_size 10m;
+    }
+
+    
+    location /payment/ {
+        proxy_pass http://127.0.0.1:8500/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto https;   ### Most PHP, Python, Rails, Java App can use this header ###
+        proxy_redirect off;     ### By default we don't want to redirect it ####
+        proxy_connect_timeout 30;
+        proxy_send_timeout 30;
+        proxy_read_timeout 60;
+        client_max_body_size 10m;
+        proxy_buffer_size 10m;
+        proxy_buffers 8 10m;
+        proxy_busy_buffers_size 10m;
+        add_header Access-Control-Allow-Origin *;
+    }
+
+}

@@ -1,0 +1,72 @@
+# ============================= #
+#       General                                 #
+# ============================= #
+[General]
+scribe_enable: true
+scribe_host: localhost
+scribe_port: 1463
+redis_host: localhost
+redis_port: 8285
+redis_db: 0
+redis_channel: websocket
+mongodb_host: localhost
+mongodb_port: 8290
+mongodb_db: forge
+mongodb_db_copy : 1
+encrypt_key: aes-key
+encrypt_user: aes-user
+intercom_key:
+max_search_level: 5
+
+# ============================= #
+#       Email                                   #
+# ============================= #
+[Email]
+email_support: support@visualops.io
+email_notify: notify@visualops.io
+email_alert: notify@visualops.io
+
+# ============================= #
+#        AppService                             #
+# ============================= #
+[AppService]
+log_level: DEBUG
+log_dir: /visualops/log
+port: 8700
+appservice_api: http://bot.jiecao.pw
+#appservice_api: http://192.168.22.133:88
+appservice_token: 8db63ff86d406d93904070561e3b9212e241fc14
+
+# ============================= #
+#       NIQIU
+# ============================= #
+[Qiniu]
+qiniu_access_key: o-b5LIy7weZuIHOFIiJqejoUYaNcQJYYSx6C7l-V
+qiniu_secret_key: pOxdwadgKuZsg3Ukl1QD6ZS8oP_SgCvtxrkeZIr1
+bucket_name: jimmy-test
+
+# ============================= #
+#       JPush                   #
+# ============================= #
+[JPush]
+app_key: a8f147813dd021adaee559b0
+master_secret: f55fc99314beb4b61b128e38
+apns_production: false
+page_size: 10
+
+# ============================= #
+#       Activiti                #
+# ============================= #
+[Activiti]
+activiti_api: http://activiti.visualops.io:8888/activiti-rest
+#activiti_api: http://192.168.22.133:8888/activiti-rest
+process_remind_onetime: process-remind-onetime-v2
+process_remind_cycle: process-remind-cycle
+
+# ============================= #
+#       WeChat                  #
+# ============================= #
+[WeChat]
+wechat_api: http://wxbot.jiecao.pw
+wechat_local_token: keuth4Det0Hef9ik0eC6oc7Ig6wyPs9yan9hAk6oK5An1Ul
+wechat_remote_token: Ig8dian2lI9griRd3I6eM7Pet1yaRc6e4tWo2harb1Ov2Nich9

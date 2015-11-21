@@ -1,0 +1,85 @@
+# -------------------------------------------------------------------------- #
+# Copyright 2011, Peng Zhao (peng@mc2.io)                        #
+# -------------------------------------------------------------------------- #
+
+server {
+    listen       80;
+    #listen       443 ssl;
+    server_name  ide.visualops.io;
+
+    access_log      /visualops/log/nginx-ide-h5-access.log;
+    error_log       /visualops/log/nginx-ide-h5-error.log debug;
+
+    # ------------- SSl ------------- #
+    #ssl_certificate         /visualops/conf/ssl/visualops.io.crt;
+    #ssl_certificate_key     /visualops/conf/ssl/visualops.io.pem;
+    #ssl_protocols SSLv3 TLSv1;
+    #ssl_ciphers ALL:!aNULL:!ADH:!eNULL:!LOW:!EXP:RC4+RSA:+HIGH:+MEDIUM;
+
+    ## Only requests to our Host are allowed
+    #if ($host !~ ^(ide.visualops.io)$ ) {
+    #   rewrite  ^/(.*)$  https://ide.visualops.io  permanent;
+    #}
+    ## Only allow these request methods
+    if ($request_method !~ ^(GET|HEAD|POST)$ ) {
+        return 444;
+    }
+    # redirect server error pages to the static page /bush.html
+
+    error_page 500 502 503 504  /500;
+
+    # rewrite guest url
+    rewrite ^/guest-(.*)$ /index.html break;
+
+    #location = /bush.html {
+    #    rewrite  ^/(.*)$  https://ide.visualops.io/  permanent;
+    #}
+
+    error_page 403 /403.html;
+    location = /403.html {
+        root  html;
+        allow all;
+    }
+
+    error_page 404 /404.html;
+    location = /404.html {
+        root /visualops/site/ide/;
+    }
+
+    location = /favicon.ico {
+        root /visualops/site/ide/;
+        index favicon.ico;
+        log_not_found off;
+        access_log off;
+    }
+
+    location / {
+
+        root /visualops/site/ide/;
+        index ide.html;
+
+        add_header Access-Control-Allow-Origin *;
+        add_header Access-Control-Allow-Headers X-Requested-With;
+        add_header Access-Control-Allow-Methods GET,POST,OPTIONS;
+    }
+
+    location /register {
+        alias /visualops/site/ide/;
+        index register.html;
+    }
+
+    location /reset {
+        alias /visualops/site/ide/;
+        index reset.html;
+    }
+
+    location /login {
+        alias /visualops/site/ide/;
+        index login.html;
+    }
+
+    location /500 {
+        alias /visualops/site/ide/;
+        index 500.html;
+    }
+}
